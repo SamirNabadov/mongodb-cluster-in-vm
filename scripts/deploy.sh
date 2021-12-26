@@ -20,7 +20,7 @@ function deploy_mongo() {
 # Test Connection to MongoDB with python application
 function connect_mongo() {
     pip3 install pymongo
-    cd ./python_app_demo && python3 mongodb.py
+    cd ./python_demo && python3 mongodb.py
 }
 
 function main() {
