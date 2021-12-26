@@ -1,4 +1,4 @@
 [cluster_nodes]
-mongodb01.dev.eurodesign.az ansible_host=192.168.90.115
-mongodb02.dev.eurodesign.az ansible_host=192.168.90.116
-mongodb03.dev.eurodesign.az ansible_host=192.168.90.117
+mongodb01.local.az ansible_host=192.168.1.10
+mongodb02.local.az ansible_host=192.168.1.11
+mongodb03.local.az ansible_host=192.168.90.12
