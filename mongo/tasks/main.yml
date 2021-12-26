@@ -39,7 +39,7 @@
 
 - name: Create admin user
   shell: 
-    cmd: "mongo mongodb://127.0.0.1:27017"
+    cmd: "{{ mongo_binary }} mongodb://127.0.0.1:27017"
     executable: /bin/bash
     stdin: |
       use admin
@@ -50,7 +50,7 @@
   when: 
     - inventory_hostname in groups["cluster_nodes"][0]
 
-- name: Create key Replica Set to Keyfile Authentication
+- name: Create key for Keyfile Authentication
   command: "openssl rand -base64 756"
   register: key_result
   run_once: yes
