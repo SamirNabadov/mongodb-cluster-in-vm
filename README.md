@@ -14,7 +14,7 @@ Basic settings
 ------------
 * Installed and Configured MongoDB cluster
 * Enabled Authorization
-* Configured Keyfile Authentication and Replication
+* Configured Replication and Keyfile Authentication for Replication 
 * Created admin user for database
 
 
