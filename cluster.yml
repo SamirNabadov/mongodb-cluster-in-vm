@@ -1,0 +1,9 @@
+--- # MongoDB Cluster playbook
+
+- name: MongoDB Cluster playbook
+  hosts: cluster_nodes
+  any_errors_fatal: true
+  become: true
+  become_user: root
+  roles:
+  - mongo

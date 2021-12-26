@@ -1,0 +1,112 @@
+---
+# tasks file for mongo
+
+- name: Update the /etc/hosts file with node names
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*{{ item }}$'
+    line: "{{ hostvars[item].ansible_host }} {{item}}"
+    state: present
+  when: 
+    - hostvars[item].ansible_host is defined
+  loop: "{{ groups.all }}"
+
+- name: Add repo for mongodb
+  yum_repository:
+    name: MongoDB
+    description: MongoDB Repository
+    baseurl: "{{ mongo_baseurl }}"
+    gpgkey: "{{ mongo_gpgkey }}"
+    enabled: yes
+    gpgcheck: yes
+
+- name: Yum clean metadata
+  command: yum clean metadata
+  args:
+    warn: no
+
+- name: Install MongoDB
+  yum:
+    name: "{{ mongo_package }}"
+    state: present
+    update_cache: yes
+
+- name: Start MongoDB
+  service:
+    name: "{{ mongo_service }}"
+    state: started
+    enabled: yes
+
+- name: Create admin user
+  shell: 
+    cmd: "mongo mongodb://127.0.0.1:27017"
+    executable: /bin/bash
+    stdin: |
+      use admin
+      db.createUser({user: '{{ mongo_username }}',pwd: '{{ mongo_password }}',roles: [ { role: 'root', db: 'admin' } ]})
+  ignore_errors: yes
+  changed_when: false
+  run_once: yes
+  when: 
+    - inventory_hostname in groups["cluster_nodes"][0]
+
+- name: Create key Replica Set to Keyfile Authentication
+  command: "openssl rand -base64 756"
+  register: key_result
+  run_once: yes
+  when: 
+    - inventory_hostname in groups["cluster_nodes"][0]
+
+- name: Copy keyfile to mondodb servers
+  copy:
+    content: "{{ key_result.stdout }}"
+    dest: "{{ mongo_data }}/mongo"
+    owner: "{{ mongo_os_username }}"
+    group: "{{ mongo_os_group }}"
+    mode: 0400
+
+- name: Override mongodb conf file
+  template: 
+    src: mongod.j2
+    dest: "{{ mongo_conf }}"
+  notify:
+    - Restart MongoDB
+
+- name: Restart Mongo service if needed
+  meta: flush_handlers
+
+- name: Configuring replicaset
+  shell: 
+    cmd: "{{ mongo_binary }} --host {{ mongo_ip }} --port 27017 -u {{ mongo_username }} -p {{ mongo_password }} --authenticationDatabase admin"
+    executable: /bin/bash
+    stdin: |
+      rs.initiate( {_id : "mongodb-rs", members: [{ _id: 0, host: "{{ groups["cluster_nodes"][0] }}:27017" },{ _id: 1, host: "{{ groups["cluster_nodes"][1] }}:27017" },{ _id: 2, host: "{{ groups["cluster_nodes"][2] }}:27017" }]}) 
+  ignore_errors: yes
+  changed_when: false
+  run_once: yes
+  when: 
+    - inventory_hostname in groups["cluster_nodes"][0]
+
+- name: Pause for 10 seconds wait replicaset.
+  pause:
+    seconds: 10
+
+- name: Check replicaset status
+  shell: 
+    cmd: "{{ mongo_binary }} --host {{ mongo_ip }} --port 27017 -u {{ mongo_username }} -p {{ mongo_password }} --authenticationDatabase admin"
+    executable: /bin/bash
+    stdin: "rs.isMaster().hosts" 
+  register: result
+  ignore_errors: yes
+  changed_when: false
+  run_once: yes
+  when: 
+    - inventory_hostname in groups["cluster_nodes"][0]
+
+- name: Cluster members
+  debug:
+    msg: "{{ result.stdout }}"
+  changed_when: false
+  run_once: yes
+  when: 
+    - inventory_hostname in groups["cluster_nodes"][0]

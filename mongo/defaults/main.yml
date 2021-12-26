@@ -1,0 +1,26 @@
+---
+# defaults file for mongo
+
+# General configuration
+mongo_baseurl: https://repo.mongodb.org/yum/amazon/2013.03/mongodb-org/4.4/x86_64/
+mongo_gpgkey: https://www.mongodb.org/static/pgp/server-4.4.asc
+mongo_package: mongodb-org
+mongo_service: mongod
+
+# Path configuration
+mongo_conf: /etc/mongod.conf
+mongo_data: /var/lib/mongo
+mongo_binary: /usr/bin/mongo
+
+# Users configuration
+mongo_username: admin
+mongo_password: admin
+mongo_os_username: mongod
+mongo_os_group: mongod
+
+# mongod.conf configuration
+mongo_ip: "{{ hostvars[inventory_hostname]['ansible_host'] }}"
+mongo_authorization: "enabled"
+mongo_keyfile: "/var/lib/mongo/mongo"
+mongo_transitionToAuth: "true"
+mongo_replica_set: "mongodb-rs"

@@ -1,0 +1,7 @@
+---
+# handlers file for mongo
+
+- name: Restart MongoDB
+  service:
+    name: "{{ mongo_service }}"
+    state: restarted
