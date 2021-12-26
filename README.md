@@ -13,8 +13,8 @@ Configured software and tools
 Basic settings
 ------------
 * Installed and Configured MongoDB cluster
-* Enabled Authorization
-* Configured Replication and Keyfile Authentication for Replication 
+* Enabled Authorization and Replication
+* Configured Keyfile Authentication for Replication 
 * Created admin user for database
 
 
