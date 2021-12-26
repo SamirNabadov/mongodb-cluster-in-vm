@@ -13,8 +13,8 @@ def mongoConnect():
         client = MongoClient(f'{params["host"]}:{params["port"]}',
                      username=params["user"],
                      password=params["password"],
-                     replicaSet="mongodb-rs",
-                     readPreference="primaryPreferred")
+                     replicaSet=params["relicaset"],
+                     readPreference=params["preference"])
 
         # Access database
         mydatabase = client.admin
